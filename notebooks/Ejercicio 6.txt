@@ -1,0 +1,58 @@
+Ejercicio 6:
+import tensorflow as tf
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense
+from sklearn.metrics import f1_score
+import numpy as np
+
+tf.random.set_seed(42)
+np.random.seed(42)
+
+# TODO: Preprocesar X_train y X_test con el preprocessor (fit_transform / transform)
+# Si la salida es sparse, convertir con .toarray()
+X_train_proc = preprocessor.fit_transform(X_train)
+X_test_proc = preprocessor.transform(X_test)
+
+if hasattr(X_train_proc, 'toarray'):
+    X_train_proc = X_train_proc.toarray()
+    X_test_proc = X_test_proc.toarray()
+# TODO: Construir Sequential con Dense(32, relu) → Dense(16, relu) → Dense(1, sigmoid)
+model = Sequential([
+    Dense(32, activation='relu', input_shape=(X_train_proc.shape[1],)),
+    Dense(16, activation='relu'),
+    Dense(1, activation='sigmoid'),
+])
+model.summary()
+# TODO: Compilar con adam + binary_crossentropy + accuracy
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
+# TODO: fit con validation_split=0.2, epochs=20, batch_size=32, verbose=0
+history = model.fit(
+    X_train_proc,
+    y_train.values,
+    validation_split=0.2,
+    epochs=20,
+    batch_size=32,
+    verbose=0
+)
+# TODO: Evaluar en test y calcular F1
+loss, acc = model.evaluate(X_test_proc, y_test.values, verbose=0)
+y_pred_nn = (model.predict(X_test_proc, verbose=0) > 0.5).astype(int).ravel()
+
+from sklearn.metrics import f1_score
+
+print(f'NN test acc={acc:.3f}  F1={f1_score(y_test, y_pred_nn):.3f}')
+# TODO: Pintar curva de loss y val_loss
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8,4))
+plt.plot(history.history['loss'], label='train')
+plt.plot(history.history['val_loss'], label='val')
+plt.xlabel('época')
+plt.ylabel('loss')
+plt.legend()
+plt.savefig('loss_curve.png', dpi=80)
+print('Curva de loss guardada')
